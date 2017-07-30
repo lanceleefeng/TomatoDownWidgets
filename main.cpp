@@ -40,13 +40,7 @@ int main(int argc, char *argv[])
         w.startCountDown();
     }
 
-    qDebug() << "\n" << __FUNCTION__;
-    //QMap<QString, int>::const_iterator i = SettingModel::tableFields().constBegin();
-    QMap<QString, int>::const_iterator i = SettingModel::getTableFields().constBegin();
-    while(i != SettingModel::getTableFields().constEnd()){
-        qDebug() << i.key() << ": " << i.value();
-        ++i;
-    }
+
 
 
     return a.exec();
