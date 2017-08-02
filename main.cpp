@@ -7,6 +7,7 @@
 //#include "mainwindow.h"
 #include "db.h"
 #include "tomato.h"
+#include "usermodel.h"
 #include "settingmodel.h"
 //#include "testmodel.h"
 
@@ -30,6 +31,7 @@ int main(int argc, char *argv[])
     }
 
     BaseModel::uid = uid;
+    UserModel::uid = uid;
 
     Tomato w;
     if(!w.initiated){

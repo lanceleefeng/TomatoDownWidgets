@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(SOURCE_FILES
         main.cpp
         mainwindow.cpp
-        mainwindow.h tomato.cpp tomato.h unitlabel.cpp unitlabel.h button.cpp button.h lineedit.cpp lineedit.h db.cpp db.h init.cpp init.h settingmodel.cpp settingmodel.h basemodel.cpp basemodel.h datetime.cpp datetime.h)
+        mainwindow.h tomato.cpp tomato.h unitlabel.cpp unitlabel.h button.cpp button.h lineedit.cpp lineedit.h db.cpp db.h init.cpp init.h settingmodel.cpp settingmodel.h basemodel.cpp basemodel.h datetime.cpp datetime.h usermodel.cpp usermodel.h)
 
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Widgets REQUIRED)

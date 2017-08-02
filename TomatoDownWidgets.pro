@@ -32,6 +32,7 @@ SOURCES += main.cpp\
         db.cpp\
         init.cpp\
         basemodel.cpp\
+        usermodel.cpp\
         settingmodel.cpp
 
 
@@ -42,6 +43,7 @@ HEADERS  += tomato.h\
         db.h\
         init.h\
         basemodel.h\
+        usermodel.h\
         settingmodel.h
 
 

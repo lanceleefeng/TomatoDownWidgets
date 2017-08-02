@@ -26,7 +26,9 @@
 #include "tomato.h"
 #include "unitlabel.h"
 
+#include "usermodel.h"
 #include "settingmodel.h"
+
 
 QString Tomato::name = "番茄倒计时";
 
@@ -35,20 +37,15 @@ Tomato::Tomato(QWidget *parent)
         , countState(CountInit)
 {
 
+    SettingModel model;
+    QVariantMap setting = model.getOne(QString("uid=%1").arg(UserModel::uid));
 
-    /*Init init;
-    if(!init.succeed()){
-        //QMessageBox::critical(0, Tomato::name, QString("初始化失败"));
-        //QMessageBox::critical(0, Tomato.name, QString("初始化失败"));
-        //QMessageBox::critical(0, Tomato::name, QString("初始化失败"));
-        //QMessageBox::critical(0, init.name, QString("初始化失败"));
-        QMessageBox::critical(0, name, QString("初始化失败"));
-        //return -1;
-        //this->quit();
+    if(!setting.isEmpty()){
+        autoStart = setting["auto_start"].toBool();
+        increase = !setting["countdown"].toBool();
 
-        return;
-    }*/
-
+        oldSettings["saveCountMode"] = !increase;
+    }
 
     QDesktopWidget *desktop = QApplication::desktop();
     qDebug() << desktop->width() << "*"<< desktop->height();
@@ -750,7 +747,7 @@ void Tomato::countModeChanged(int state)
     increase = !(state == Qt::Checked);
     countDown();
     //settings["countMode"] =
-    newSettings["saveCountMode"] = increase;
+    newSettings["saveCountMode"] = !increase;
     beginSaveCountMode();
 }
 
@@ -911,26 +908,32 @@ void Tomato::beginSaveCountMode()
         return;
     }
     delayedActions[key] = true;
-    QTimer::singleShot(3000, this, SLOT(endSaveCountMode()));
+    //QTimer::singleShot(3000, this, SLOT(endSaveCountMode()));
+    QTimer::singleShot(500, this, SLOT(endSaveCountMode()));
 
 }
 
 void Tomato::endSaveCountMode()
 {
 
-    delayedActions["saveCountMode"] = false;
 
     QString key = "saveCountMode";
+    delayedActions[key] = false;
 
     qDebug() << "IN " << __FUNCTION__ << ", 执行保存程序";
 
     //if(newSettings[key] == increase)
 
-    if(newSettings[key].toBool() == oldSettings[key].toBool()){
+    bool newVal = newSettings[key].toBool();
+    bool oldVal = oldSettings[key].toBool();
+
+    qDebug() << "新值：" << newVal << ", 旧值：" << oldVal;
+
+    if(newVal == oldVal){
         qDebug() << "与原值相同，不保存";
         return;
     }
-    oldSettings[key] = increase;
+    oldSettings[key] = !increase;
 
     int countDown = increase ? 0 : 1;
 
