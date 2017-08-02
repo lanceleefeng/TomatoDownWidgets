@@ -81,7 +81,7 @@ bool BaseModel::add(QVariantMap data)
     QMap<QString, int> fields = getFields(table, true);
 
     if(fields.isEmpty()){
-        //qDebug() << "shit, fields not obtained";
+        qDebug() << "shit, fields not obtained";
         return false;
     }
 
@@ -231,7 +231,7 @@ QString BaseModel::getWhere(QVariantMap where)
         ++con;
     }
 
-    //qDebug() << "where: " << w;
+    qDebug() << "where: " << w;
     return w;
 }
 

@@ -2,8 +2,11 @@
 #ifndef SETTINGMODEL_H
 #define SETTINGMODEL_H
 
+#include "datetime.h"
 #include "db.h"
+
 #include "basemodel.h"
+
 
 
 class SettingModel : public BaseModel

@@ -3,6 +3,8 @@
 #include <QtSql>
 #include <QSqlTableModel>
 
+#include "datetime.h"
+
 #include "db.h"
 #include "settingmodel.h"
 
@@ -47,16 +49,23 @@ bool SettingModel::saveCountMode(int countDown)
 bool SettingModel::save(QVariantMap data)
 {
     QVariantMap where;
+    QString time = DateTime::getTime();
+
     where["uid"] = uid;
 
     QVariantMap row = getOne(where);
 
+
     if(row.isEmpty()){
-        //qDebug() << "没有数据";
+        qDebug() << "没有数据";
+        data["uid"] = uid;
+        data["created_at"] = time;
+        data["updated_at"] = time;
         add(data);
     }else{
-        //qDebug() << "已有数据";
-        //where["id"] = row["id"];
+        qDebug() << "已有数据";
+        where["id"] = row["id"];
+        data["updated_at"] = time;
         update(data, where);
     }
 

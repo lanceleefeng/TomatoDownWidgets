@@ -10,6 +10,7 @@
 #include "settingmodel.h"
 //#include "testmodel.h"
 
+static int uid = 1;
 
 int main(int argc, char *argv[])
 {
@@ -28,6 +29,8 @@ int main(int argc, char *argv[])
         //return;
     }
 
+    BaseModel::uid = uid;
+
     Tomato w;
     if(!w.initiated){
         a.quit();
@@ -45,3 +48,5 @@ int main(int argc, char *argv[])
 
     return a.exec();
 }
+
+
