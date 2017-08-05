@@ -29,6 +29,7 @@ SOURCES += main.cpp\
         unitlabel.cpp \
         lineedit.cpp\
         datetime.cpp\
+        config.cpp\
         db.cpp\
         init.cpp\
         basemodel.cpp\
@@ -40,6 +41,7 @@ HEADERS  += tomato.h\
         unitlabel.h\
         lineedit.h\
         datetime.h\
+        config.h\
         db.h\
         init.h\
         basemodel.h\

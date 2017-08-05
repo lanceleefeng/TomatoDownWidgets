@@ -18,6 +18,7 @@
 
 #include <QDebug>
 
+#include "config.h";
 
 #include "db.h"
 #include "init.h"
@@ -41,10 +42,14 @@ Tomato::Tomato(QWidget *parent)
     QVariantMap setting = model.getOne(QString("uid=%1").arg(UserModel::uid));
 
     if(!setting.isEmpty()){
-        autoStart = setting["auto_start"].toBool();
         increase = !setting["countdown"].toBool();
+        autoStart = setting["auto_start"].toBool();
 
-        oldSettings["saveCountMode"] = !increase;
+        oldSettings["countdown"] = !increase;
+        oldSettings["auto_start"] = autoStart;
+
+        // 为了优化，判断是否有修改
+        newSettings = oldSettings;
     }
 
     QDesktopWidget *desktop = QApplication::desktop();
@@ -56,7 +61,6 @@ Tomato::Tomato(QWidget *parent)
 
     int geoX = (availableRect.width() - width)/2;
     //int geoY = (availableRect.height() - height)/2;
-
 
 
     //setGeometry: Unable to set geometry 22x22+400+190 on QWidgetWindow/'TomatoClassWindow'.
@@ -224,6 +228,7 @@ Tomato::Tomato(QWidget *parent)
     autoStartCheckBox->setToolTip("启动时是否自动开始计时（使用最近设置）");
     autoStartCheckBox->setChecked(autoStart);
 
+    connect(autoStartCheckBox, &QCheckBox::stateChanged, this, &Tomato::autoStartChanged);
 
 
 
@@ -739,16 +744,19 @@ void Tomato::countDown()
 //void Tomato::increaseChanged(Qt::CheckState state)
 void Tomato::countModeChanged(int state)
 {
-    QString key = "saveCountMode";
-    qDebug() << "increase: " << state;
-    //increase = state == Qt::Checked ? true : false;
-    //increase = state == Qt::Checked;
-    //oldSettings[key] = increase;
     increase = !(state == Qt::Checked);
+    newSettings["countdown"] = !increase;
+    beginSaveSetting();
+
     countDown();
-    //settings["countMode"] =
-    newSettings["saveCountMode"] = !increase;
-    beginSaveCountMode();
+}
+
+void Tomato::autoStartChanged(int state)
+{
+    // state 有三个值：0 未选择，2 选择，1 部分选择
+    autoStart = (bool)state;
+    newSettings["auto_start"] = autoStart;
+    beginSaveSetting();
 }
 
 void Tomato::setOverlayIcon(int min)
@@ -898,6 +906,62 @@ void Tomato::addButtonClicked()
 }
 
 
+void Tomato::beginSaveSetting()
+{
+    if(delayedActions[keySaveSetting]){
+        return;
+    }
+    delayedActions[keySaveSetting] = true;
+
+    int milliSeconds = Config::isDebug ? 500 : 1000;
+    qDebug() << "延时" << milliSeconds << "ms";
+    //QTimer::singleShot(3000, this, SLOT(endSaveSetting()));
+    QTimer::singleShot(milliSeconds, this, SLOT(endSaveSetting()));
+}
+
+
+void Tomato::endSaveSetting()
+{
+    delayedActions[keySaveSetting] = false;
+    qDebug() << "保存设置";
+
+    qDebug() << "新值： auto_start: " << newSettings["auto_start"] << "; countdown: " << newSettings["countdown"];
+    qDebug() << "旧值： auto_start: " << oldSettings["auto_start"] << "; countdown: " << oldSettings["countdown"];
+
+    // 相等比较并不可靠：
+    // 初始化时给oldSettings赋值了，而没有给newSettings赋值
+    // newSettings只有修改的参数才会赋值，造成已有的值是空的，判断失败
+    // 不仅如此，由于修改保存后会把新值赋值给旧值，结果是所有没有修改过的又变成未赋值的
+    // 造成每个设置第一次双击两次保存异常，不能正常识别
+    // 更简单的解释：
+    // 每个设置项只要没有修改，就一直是空的，与全部填充的旧值比，肯定是不相等的；
+    // 第一个快速两次点击的，肯定是不同的，因此保存，造成其他未点击的被清空；
+    // 在之后，快速两次单击其他任何一个选项，都会出现已设置值与未设置，就是一直保存，起不到优化作用。
+    // 2017-8-6 0:51:45
+    // 加上初始化时把旧值赋值给新值，就解决了这个问题。
+    // 有修改时只把修改的改了，两次点击又改回来了，做了优化，不执行数据库操作；
+    // 首次保存后其他选项被清空，不能优化的bug也解决了。
+
+    if(newSettings == oldSettings){
+        qDebug() << "新值与旧值相同，不保存";
+        return;
+    }
+    // 改进：
+    // 方案一是遍历新值，新值中有与旧值不同的，才认为有修改；
+    // 方案二是判断不变，初始化时同时把旧值赋值给新值，这样没有修改的就是相等的了，
+    // 不遍历比较，采用方案二。
+
+
+    SettingModel settingModel;
+    settingModel.save(newSettings);
+    oldSettings = newSettings;
+
+}
+
+
+/**
+ * 开始保存（启动倒计时）
+ */
 void Tomato::beginSaveCountMode()
 {
 
@@ -909,9 +973,13 @@ void Tomato::beginSaveCountMode()
     }
     delayedActions[key] = true;
     //QTimer::singleShot(3000, this, SLOT(endSaveCountMode()));
-    QTimer::singleShot(500, this, SLOT(endSaveCountMode()));
+    //QTimer::singleShot(500, this, SLOT(endSaveCountMode()));
 
 }
+
+/**
+ * 结束保存（倒计时结束时调用）
+ */
 
 void Tomato::endSaveCountMode()
 {

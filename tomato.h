@@ -18,6 +18,7 @@
 #include <QWinTaskbarButton>
 #include <QWinTaskbarProgress>
 
+//#include "config.h"
 
 #include "lineedit.h"
 
@@ -30,8 +31,6 @@ class Tomato : public QWidget
 public:
     Tomato(QWidget *parent=0);
     ~Tomato();
-
-
 
     //QString name = "番茄倒计时";
     //static name = "番茄倒计时";
@@ -133,11 +132,19 @@ public:
     LineEdit *inputBreakTime;
 
 
-    QHash<QString, QVariant> settings;
-    QHash<QString, QVariant> newSettings;
-    QHash<QString, QVariant> oldSettings;
+    //QHash<QString, QVariant> settings;
+    //QHash<QString, QVariant> newSettings;
+    //QHash<QString, QVariant> oldSettings;
+
+    QMap<QString, QVariant> settings;
+    QMap<QString, QVariant> newSettings;
+    QMap<QString, QVariant> oldSettings;
+
 
     QHash<QString, bool> delayedActions; // 没有设置的值获取时是false
+    QString keySaveSetting = "saveSetting";
+    //QMap<QString, QString> fields;
+
     //QList<QString, QTimer *> timer;
     QHash<QString, QTimer *> timer;
     QHash<QString, qint64> timeConsumed;
@@ -160,6 +167,8 @@ public:
 
     QVBoxLayout *rightLayout;
 
+    //void beginSaveSetting();
+
     void beginSaveCountMode();
 
 public slots:
@@ -176,18 +185,23 @@ public slots:
     //void increaseChanged(Qt::CheckState state);
     //void increaseChanged(int state);
     void countModeChanged(int state);
+    void autoStartChanged(int state);
 
 
     void addButtonClicked();
 
 
+    void endSaveSetting();
     void endSaveCountMode();
+
 
 
 private:
 
     void setControlButtonVisibility();
 
+
+    void beginSaveSetting();
 
 };
 
