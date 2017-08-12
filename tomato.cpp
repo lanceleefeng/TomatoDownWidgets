@@ -19,6 +19,7 @@
 #include <QDebug>
 
 #include "config.h";
+#include "datetime.h"
 
 #include "db.h"
 #include "init.h"
@@ -363,7 +364,7 @@ void Tomato::startCountDown()
     row["from_time"] = QDateTime::currentDateTime();
     row["to_time"] = row["from_time"].toDateTime().addSecs(row["time"].toInt()*60);
 
-    to->setText(row["to_time"].toDateTime().toString("yyyy-MM-dd hh:mm::ss"));
+    to->setText(row["to_time"].toDateTime().toString(DateTime::defaultFormat));
 
     //row["timer"] = new QTimer();
     timer[key] = new QTimer();
@@ -389,7 +390,7 @@ void Tomato::restart()
 
     row["from_time"] = QDateTime::currentDateTime();
     row["to_time"] = row["from_time"].toDateTime().addSecs(row["time"].toInt()*60);
-    to->setText(row["to_time"].toDateTime().toString("yyyy-MM-dd hh:mm::ss"));
+    to->setText(row["to_time"].toDateTime().toString(DateTime::defaultFormat));
 
     //row["timer"] = new QTimer();
     //timer[key] = new QTimer();
@@ -408,7 +409,7 @@ void Tomato::continueCountDown()
 
     // 需要重新计算到时时间
     row["to_time"] = row["from_time"].toDateTime().addSecs(row["time"].toInt()*60 - timeConsumed[key]);
-    to->setText(row["to_time"].toDateTime().toString("yyyy-MM-dd hh:mm::ss"));
+    to->setText(row["to_time"].toDateTime().toString(DateTime::defaultFormat));
 
     countDown();
 }
