@@ -582,13 +582,15 @@ void Tomato::countDown()
                 //timeConsumed[key] = secs;
                 state = (secs < (time - tipTime)*60) ? Normal : Stop;
 
-                overlayMin = secs/60;
+                //overlayMin = secs/60;
+                overlayMin = time - secs/60;
                 titleSec = secs%60;
 
                 // 倒数时处理进位
-                titleMin = (titleSec == 0) ? (time - overlayMin) : (time - overlayMin - 1);
+                //titleMin = (titleSec == 0) ? (time - overlayMin) : (time - overlayMin - 1);
+                titleMin = (titleSec == 0) ? overlayMin : (overlayMin - 1);
                 titleSec = (titleSec == 0) ? 0 : (60 - titleSec);
-                overlayMin = time - m;
+                //overlayMin = time - m;
 
                 //value = secs;
                 maxValue = time*60;
@@ -764,6 +766,7 @@ void Tomato::setOverlayIcon(int min)
 
     // 优化空间：
     // 每秒执行一次，但min是60秒，如果min没有变，没有必要重新绘制!
+    //qDebug() << "min: " << min << "last min: " << lastOverlayMin;
 
     if(min == lastOverlayMin){
         return;
