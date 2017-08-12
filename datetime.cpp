@@ -4,7 +4,7 @@
 #include "datetime.h"
 
 
-QString DateTime::defaultFormat = "yyyy-MM-dd hh:mm::ss";
+QString DateTime::defaultFormat = "yyyy-MM-dd hh:mm:ss";
 
 QString DateTime::getTime()
 {
