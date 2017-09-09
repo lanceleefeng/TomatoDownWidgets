@@ -345,6 +345,9 @@ Tomato::~Tomato()
 
 }
 
+/**
+ * 开始计时
+ */
 void Tomato::startCountDown()
 {
 
@@ -366,17 +369,16 @@ void Tomato::startCountDown()
 
     to->setText(row["to_time"].toDateTime().toString(DateTime::defaultFormat));
 
-    //row["timer"] = new QTimer();
-    timer[key] = new QTimer();
-
-    //connect(row["timer"], &QTimer::timeout, this, &Tomato::countDown);
-    //connect(row["timer"].toTimier(), &QTimer::timeout, this, &Tomato::countDown);
-    connect(timer[key], &QTimer::timeout, this, &Tomato::countDown);
+    //timer[key] = new QTimer();
+    //connect(timer[key], &QTimer::timeout, this, &Tomato::countDown);
+    createTimer(key);
     timer[key]->start(1000);
     countDown();
 }
 
-
+/**
+ * 重新计时
+ */
 void Tomato::restart()
 {
     //countState = CountInProgress;
@@ -392,16 +394,16 @@ void Tomato::restart()
     row["to_time"] = row["from_time"].toDateTime().addSecs(row["time"].toInt()*60);
     to->setText(row["to_time"].toDateTime().toString(DateTime::defaultFormat));
 
-    //row["timer"] = new QTimer();
-    //timer[key] = new QTimer();
-    timer[key]->stop();
+    createTimer(key);
 
-    //connect(timer[key], &QTimer::timeout, this, &Tomato::countDown);
+    timer[key]->stop();
     timer[key]->start(1000);
     countDown();
 }
 
-
+/**
+ * 继续计时
+ */
 void Tomato::continueCountDown()
 {
     setCountState(CountInProgress);
@@ -414,6 +416,9 @@ void Tomato::continueCountDown()
     countDown();
 }
 
+/**
+ * 暂停
+ */
 void Tomato::pause()
 {
     //timeConsumed[key] = getSecondsSince(row["from_time"].toDateTime());
@@ -425,6 +430,9 @@ void Tomato::pause()
     countDown();
 }
 
+/**
+ * 停止
+ */
 void Tomato::stop()
 {
     if(countState == CountInProgress){
@@ -437,6 +445,10 @@ void Tomato::stop()
     countDown();
 }
 
+
+/**
+ * 开始休息
+ */
 void Tomato::startBreak()
 {
 
@@ -452,10 +464,28 @@ void Tomato::startBreak()
     row["to_time_break"] = row["from_time"].toDateTime().addSecs(row["breakTime"].toInt()*60);
     to->setText(row["to_time_break"].toDateTime().toString("yyyy-MM-dd hh:mm:ss"));
 
+    createTimer(key);
+    timer[key]->start(1000);
+
     countDown();
 }
 
+/**
+ * 创建计时器
+ * 如果timer中不存在值为timerKey的课时则创建并连接信号槽
+ * @param timerKey
+ */
+void Tomato::createTimer(QString timerKey)
+{
+    if(!timer.contains(timerKey)){
+        timer[key] = new QTimer();
+        connect(timer[key], &QTimer::timeout, this, &Tomato::countDown);
+    }
+}
 
+/**
+ * 计时主体程序
+ */
 void Tomato::countDown()
 {
 
@@ -486,6 +516,9 @@ void Tomato::countDown()
     maxValue = 0;
 
     if(increase){
+
+        qDebug() << "状态：" << countState << __LINE__;
+
         switch(countState)
         {
             case CountInProgress:
@@ -501,7 +534,7 @@ void Tomato::countDown()
                 state = (secs < (time - tipTime)*60) ? Normal : Stop;
 
                 overlayMin = secs/60;
-                titleSec = secs%60;
+                titleSec   = secs%60;
 
                 value = secs;
                 maxValue = time*60;
@@ -558,6 +591,8 @@ void Tomato::countDown()
         }
     }else{
 
+        qDebug() << "状态：" << countState << __LINE__;
+
         //titleSec == (s == 0) ? 0 : (60 - s);
 
         // 倒数计时时显示剩余的分钟、秒数
@@ -567,7 +602,6 @@ void Tomato::countDown()
             consumedMin = time - consumedMin - 1;
             consumedSec = 60 - consumedSec;
         }
-
 
         switch(countState)
         {

@@ -150,6 +150,8 @@ public:
     QHash<QString, qint64> timeConsumed;
     QString key = "one"; // 一条计时数据保存使用的key，便于以后扩展成多个计时
 
+    void createTimer(QString timerKey);
+
     QWinTaskbarButton *taskbarButton;
     QWinTaskbarProgress *taskbarProgress;
 
