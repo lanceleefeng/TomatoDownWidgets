@@ -78,14 +78,11 @@ public:
     // 任务栏图标进度条状态
     enum State {
         Normal = 1,
-        Pause = 2,
-        Stop = 3,
+        Pause  = 2,
+        Stop   = 3,
     };
 
-
     State state;
-    //int state;
-
     // 计时状态
     enum CountState {
         CountInit = 10,

@@ -401,50 +401,6 @@ void Tomato::restart()
     countDown();
 }
 
-/**
- * 继续计时
- */
-void Tomato::continueCountDown()
-{
-    setCountState(CountInProgress);
-    row["from_time"] = QDateTime::currentDateTime();
-
-    // 需要重新计算到时时间
-    row["to_time"] = row["from_time"].toDateTime().addSecs(row["time"].toInt()*60 - timeConsumed[key]);
-    to->setText(row["to_time"].toDateTime().toString(DateTime::defaultFormat));
-
-    countDown();
-}
-
-/**
- * 暂停
- */
-void Tomato::pause()
-{
-    //timeConsumed[key] = getSecondsSince(row["from_time"].toDateTime());
-    timeConsumed[key] += getSecondsSince(row["from_time"].toDateTime());
-    qDebug() << "已耗时：" << timeConsumed[key] << "s";
-
-    setCountState(CountPause);
-    row["from_time"] = QDateTime::currentDateTime();
-    countDown();
-}
-
-/**
- * 停止
- */
-void Tomato::stop()
-{
-    if(countState == CountInProgress){
-        timeConsumed[key] += getSecondsSince(row["from_time"].toDateTime());
-    }
-    setCountState(CountStop);
-    row["from_time"] = QDateTime::currentDateTime();
-    to->setText("-");
-    //timer[key]->stop();
-    countDown();
-}
-
 
 /**
  * 开始休息
@@ -465,10 +421,57 @@ void Tomato::startBreak()
     to->setText(row["to_time_break"].toDateTime().toString("yyyy-MM-dd hh:mm:ss"));
 
     createTimer(key);
+    timer[key]->stop();
     timer[key]->start(1000);
+    countDown();
+}
+
+
+/**
+ * 暂停
+ */
+void Tomato::pause()
+{
+    //timeConsumed[key] = getSecondsSince(row["from_time"].toDateTime());
+    timeConsumed[key] += getSecondsSince(row["from_time"].toDateTime());
+    qDebug() << "已耗时：" << timeConsumed[key] << "s";
+
+    setCountState(CountPause);
+    row["from_time"] = QDateTime::currentDateTime();
+    countDown();
+}
+
+
+/**
+ * 继续计时
+ */
+void Tomato::continueCountDown()
+{
+    setCountState(CountInProgress);
+    row["from_time"] = QDateTime::currentDateTime();
+
+    // 需要重新计算到时时间
+    row["to_time"] = row["from_time"].toDateTime().addSecs(row["time"].toInt()*60 - timeConsumed[key]);
+    to->setText(row["to_time"].toDateTime().toString(DateTime::defaultFormat));
 
     countDown();
 }
+
+/**
+ * 停止
+ */
+void Tomato::stop()
+{
+    if(countState == CountInProgress){
+        timeConsumed[key] += getSecondsSince(row["from_time"].toDateTime());
+    }
+    setCountState(CountStop);
+    row["from_time"] = QDateTime::currentDateTime();
+    to->setText("-");
+    //timer[key]->stop();
+    countDown();
+}
+
 
 /**
  * 创建计时器
@@ -867,12 +870,6 @@ void Tomato::setTaskbarProgress(State state, int value, int maxValue)
 
 }
 
-void Tomato::setCountState(CountState state)
-{
-    countState = state;
-    setControlButtonVisibility();
-}
-
 
 QString Tomato::paddingZero(qint64 i)
 {
@@ -886,8 +883,18 @@ qint64 Tomato::getSecondsSince(QDateTime time)
     return mSecs/1000;
 }
 
+
+void Tomato::setCountState(CountState state)
+{
+    countState = state;
+    setControlButtonVisibility();
+}
+
 void Tomato::setControlButtonVisibility()
 {
+    // 优化方案：
+    // 都显示，再把各个状态的隐藏掉？
+
     switch(countState)
     {
         case CountInProgress:

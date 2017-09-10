@@ -17,6 +17,7 @@ public:
     static QString getTime();
     static QString getTime(QString format);
 
+
 };
 
 
